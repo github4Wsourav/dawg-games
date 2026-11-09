@@ -1,0 +1,71 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Package APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.10.2
+
+      - name: Build Debug APK
+        run: |
+          gradle wrapper
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Rename & Prepare APK
+        run: |
+          mkdir -p release-artifacts
+          cp app/build/outputs/apk/debug/app-debug.apk release-artifacts/DAWG-Games-v1.0.0.apk
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DAWG-Games-v1.0.0-APK
+          path: release-artifacts/DAWG-Games-v1.0.0.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: v1.0.0
+          name: "DAWG Games v1.0.0 (Downloadable APK)"
+          body: |
+            ## DAWG Games v1.0.0 — Clean-Room Android Release
+            
+            Pre-compiled, downloadable APK of **DAWG Games**, rebuilt cleanly with zero telemetry, local Room SQLite persistence, and modern Jetpack Compose.
+            
+            ### 📥 Download
+            - **[DAWG-Games-v1.0.0.apk](https://github.com/github4Wsourav/dawg-games/releases/download/v1.0.0/DAWG-Games-v1.0.0.apk)**
+            
+            ### ✨ Highlights
+            - **100% Free & No Ads**: Purged of AppLovin MAX, RTB trackers, and cloud lock-in.
+            - **Local Room DB**: Progress, playtime, and custom games stored locally.
+            - **Custom Add Game Action**: Dynamic addition of games directly from dashboard.
+            - **GameGenie Assistant**: Local offline gaming assistant.
+          files: release-artifacts/DAWG-Games-v1.0.0.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

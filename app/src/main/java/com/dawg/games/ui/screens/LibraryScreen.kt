@@ -55,13 +55,12 @@ fun LibraryScreen(
                     }
                 },
                 actions = {
-                    // Export button for repo sync
-                    IconButton(onClick = {
-                        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).run {
-                            // trigger export
-                        }
-                    }) {
-                        // Will trigger via dialog
+                    IconButton(onClick = { showExportDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Export JSON",
+                            tint = GameSecondary
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = GameBackground)
@@ -135,12 +134,7 @@ fun LibraryScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Button(
-                                onClick = {
-                                    kotlinx.coroutines.GlobalScope.run {
-                                        // launch export
-                                    }
-                                    showExportDialog = true
-                                },
+                                onClick = { showExportDialog = true },
                                 colors = ButtonDefaults.buttonColors(containerColor = GamePrimary),
                                 shape = RoundedCornerShape(10.dp),
                                 modifier = Modifier.weight(1f)
